@@ -28,10 +28,23 @@ describe UsersController do
         response.should have_selector('title', :content => "All users")
       end
       
-      it "should have an element for each user" do
-        get :index
-        User.all.each do |user|
-          response.should have_selector('li', :content => user.name)
+      describe "pagination" do
+        before(:all) { 30.times { FactoryGirl.create(:user) } }
+        after(:all)  { User.delete_all }
+        
+        it "should paginate users" do
+          get :index
+          response.should have_selector('div.pagination')
+          response.should have_selector('li.disabled a', content: "Previous")
+          response.should have_selector('a', href: "/users?page=2", content: "2")
+          response.should have_selector('a', href: "/users?page=2", content: "Next")
+        end
+        
+        it "should list each user" do
+          get :index
+          User.paginate(page: 1).each do |user|
+            response.should have_selector('li', content: user.name)
+          end
         end
       end
     end
@@ -185,7 +198,7 @@ describe UsersController do
         @user.reload
         @user.name.should == user.name
         @user.email.should == user.email
-        @user.encrypted_password.should == user.encrypted_password
+        @user.password_digest.should == user.password_digest
       end
       
       it "should have a flash message" do
