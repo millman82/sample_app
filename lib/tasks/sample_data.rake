@@ -12,7 +12,6 @@ namespace :db do
       name  = Faker::Name.name
       email = "example-#{n+1}@railstutorial.org"
       password  = "password"
-      role_ids = [1]
       User.create!(name: name,
                    email: email,
                    password: password,
