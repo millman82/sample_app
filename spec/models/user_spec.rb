@@ -2,13 +2,13 @@
 #
 # Table name: users
 #
-#  id                 :integer          not null, primary key
-#  name               :string(255)
-#  email              :string(255)
-#  created_at         :datetime         not null
-#  updated_at         :datetime         not null
-#  encrypted_password :string(255)
-#  salt               :string(255)
+#  id              :integer          not null, primary key
+#  name            :string(255)
+#  email           :string(255)
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  password_digest :string(255)
+#  remember_token  :string(255)
 #
 
 require 'spec_helper'
@@ -128,6 +128,30 @@ describe User do
       long = "a" * 41
       hash = @attr.merge(:password => long, :password_confirmation => long)
       User.new(hash).should_not be_valid
+    end
+  end
+  
+  describe "roles" do
+    before(:each) do
+      @user = User.create!(@attr)
+    end
+    
+    it "should respond to has role" do
+      @user.should respond_to(:has_role?)
+    end
+    
+    it "should be a user by default" do
+      @user.has_role?(:user).should be_true
+    end
+    
+    it "should not be an admin by default" do
+      @user.has_role?(:admin).should be_false
+    end
+    
+    it "should be convertable to an admin" do
+      @user.role_ids = [2]
+      @user.has_role?(:user).should be_false
+      @user.has_role?(:admin).should be_true
     end
   end
   
