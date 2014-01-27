@@ -155,4 +155,31 @@ describe User do
     end
   end
   
+  describe "micropost associations" do
+    before { @user = User.create(@attr) }
+    let!(:older_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+    end
+    let!(:newer_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+    end
+    
+    subject { @user }
+    
+    it { should respond_to(:microposts) }
+    
+    it "should have the right microposts in the right order" do
+      @user.microposts.should == [newer_micropost, older_micropost]
+    end
+    
+    it "should destroy associated microposts" do
+      @user.destroy
+      [newer_micropost, older_micropost].each do |micropost|
+        lambda do
+          Micropost.find(micropost)
+        end.should raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
+  
 end
