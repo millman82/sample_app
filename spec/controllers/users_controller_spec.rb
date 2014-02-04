@@ -98,7 +98,7 @@ describe UsersController do
       mp2 = FactoryGirl.create(:micropost, user: user, content: "Baz quux")
       get :show, id: user
       response.should have_selector('span.content', content: mp1.content)
-      response.should have_selector('span.content', content: mp1.content)
+      response.should have_selector('span.content', content: mp2.content)
       response.should have_selector('h3', content: user.microposts.count.to_s)
     end
     

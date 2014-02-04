@@ -180,6 +180,22 @@ describe User do
         Micropost.find_by_id(micropost.id).should be_nil
       end
     end
+    
+    describe "status feed" do
+      it "should have a feed" do
+        @user.should respond_to(:feed)
+      end
+      
+      it "should include the user's microposts" do
+        @user.feed.should include(older_micropost)
+        @user.feed.should include(newer_micropost)
+      end
+      
+      it "should not include a different user's microposts" do
+        mp3 = FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
+        @user.feed.should_not include(mp3)
+      end
+    end
   end
   
 end

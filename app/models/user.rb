@@ -39,6 +39,10 @@ class User < ActiveRecord::Base
     roles.any? { |r| r.name.underscore.to_sym == role_sym }
   end
   
+  def feed
+    Micropost.where("user_id = ?", id)
+  end
+  
   private
   
     def create_remember_token
