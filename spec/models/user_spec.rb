@@ -173,11 +173,11 @@ describe User do
     end
     
     it "should destroy associated microposts" do
+      microposts = @user.microposts.dup
       @user.destroy
-      [newer_micropost, older_micropost].each do |micropost|
-        lambda do
-          Micropost.find(micropost)
-        end.should raise_error(ActiveRecord::RecordNotFound)
+      microposts.should_not be_empty
+      microposts.each do |micropost|
+        Micropost.find_by_id(micropost.id).should be_nil
       end
     end
   end

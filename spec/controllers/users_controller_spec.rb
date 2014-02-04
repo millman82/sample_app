@@ -92,6 +92,21 @@ describe UsersController do
       get :show, :id => user
       response.should have_selector('h1>img', :class => "gravatar")
     end
+    
+    it "should show the user's microposts" do
+      mp1 = FactoryGirl.create(:micropost, user: user, content: "Foo bar")
+      mp2 = FactoryGirl.create(:micropost, user: user, content: "Baz quux")
+      get :show, id: user
+      response.should have_selector('span.content', content: mp1.content)
+      response.should have_selector('span.content', content: mp1.content)
+      response.should have_selector('h3', content: user.microposts.count.to_s)
+    end
+    
+    it "should paginate microposts" do
+      35.times { FactoryGirl.create(:micropost, user: user, content: "foo") }
+      get :show, id: user
+      response.should have_selector('div.pagination')
+    end
   end
   
   describe "GET 'new'" do
