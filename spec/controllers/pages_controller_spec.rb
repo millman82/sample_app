@@ -8,20 +8,51 @@ describe PagesController do
   end
   
   describe "GET 'home'" do
-    it "should be successful" do
-      get 'home'
-      response.should be_success
+    describe "when not signed in" do
+      it "should be successful" do
+        get :home
+        response.should be_success
+      end
+    
+      it "should have the right title" do
+        get :home
+        response.should have_selector('title',
+                                      :content => "#{@base_title} | Home")
+      end
+    
+      it "should have a non-blank body" do
+        get :home
+        response.body.should_not =~ /<body>\s*<\/body>/
+      end
     end
     
-    it "should have the right title" do
-      get 'home'
-      response.should have_selector('title',
-                                    :content => "#{@base_title} | Home")
-    end
-    
-    it "should have a non-blank body" do
-      get 'home'
-      response.body.should_not =~ /<body>\s*<\/body>/
+    describe "when signed in" do
+      let(:user) { FactoryGirl.create(:user) }
+      
+      before do
+        FactoryGirl.create(:micropost, user: user, content: "Lorem")
+        FactoryGirl.create(:micropost, user: user, content: "Ipsum")
+        test_sign_in(user)
+        get :home
+      end
+      
+      it "should render the user's feed" do
+        user.feed.each do |item|
+          response.should have_selector("li##{item.id}", content: item.content)
+        end
+      end
+      
+      describe "follower/following counts" do
+        let(:other_user) { FactoryGirl.create(:user) }
+        
+        before do
+          other_user.follow!(user)
+          get :home
+        end
+        
+        it { response.should have_selector('a', href: following_user_path(user)), content: "0 following" }
+        it { response.should have_selector('a', href: followers_user_path(user)), content: "1 followers" }
+      end 
     end
   end
 
